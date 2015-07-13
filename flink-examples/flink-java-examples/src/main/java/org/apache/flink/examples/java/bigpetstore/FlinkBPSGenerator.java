@@ -25,14 +25,17 @@ import org.apache.bigtop.bigpetstore.datagenerator.DataLoader;
 import org.apache.bigtop.bigpetstore.datagenerator.StoreGenerator;
 import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Customer;
 import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Store;
+import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Transaction;
 import org.apache.bigtop.bigpetstore.datagenerator.datamodels.inputs.InputData;
 import org.apache.bigtop.bigpetstore.datagenerator.framework.SeedFactory;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.examples.java.wordcount.util.WordCountData;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
+import org.apache.flink.types.Record;
 import org.apache.flink.util.Collector;
 
 /**
@@ -72,37 +75,17 @@ public class FlinkBPSGenerator {
 		}
 		
 		//now need to put customers into n partitions, and have each partition run a generator.
-		
-		
-		
-		DataSet lineItems = generator.generateData(env);
-		generator.writeData(lineItems);
-				 
-		if(!parseParameters(args)) {
-			return;
-		}
-		
-		// set up the execution environment
-		//final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-		
-		// get input data
-		DataSet<String> text = getTextDataSet(env);
+		DataSet<Customer> data = env.fromCollection(customers);
+		data.map(
+				new MapFunction<Customer, Transaction>() {
 
-		DataSet<Tuple2<String, Integer>> counts = 
-				// split up the lines in pairs (2-tuples) containing: (word,1)
-				text.flatMap(new Tokenizer())
-				// group by the tuple field "0" and sum up tuple field "1"
-				.groupBy(0)
-				.sum(1);
+					@Override
+					public Transaction map(Customer value) throws Exception {
 
-		// emit result
-		if(fileOutput) {
-			counts.writeAsCsv(outputPath, "\n", " ");
-			// execute program
-			env.execute("WordCount Example");
-		} else {
-			counts.print();
-		}
+						//todo... finish this part.
+						return null;
+					}
+				});
 		
 
 	}
